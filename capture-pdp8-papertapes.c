@@ -55,8 +55,6 @@ enum captureState_e {
 	CS_LEAD_IN,
 	CS_DATA_H,
 	CS_DATA_L,
-	CS_ADDRESS_H,
-	CS_ADDRESS_L,
 	CS_TRAIL,
 	CS_DONE
 };
@@ -70,8 +68,6 @@ void capture_raw(FILE *f, enum captureState_e *state, unsigned char c)
 		case CS_LEAD_IN:
 		case CS_DATA_H:
 		case CS_DATA_L:
-		case CS_ADDRESS_H:
-		case CS_ADDRESS_L:
 		case CS_TRAIL:
 		case CS_DONE:
 			fputc(c, f);
@@ -87,7 +83,7 @@ void capture_rim(FILE *f, enum captureState_e *state, unsigned char c)
 		case CS_START:
 			if (c == CC_LEAD)
 				leadinCount++;
-				*state = CS_LEAD_IN;
+			*state = CS_LEAD_IN;
 			break;
 
 		case CS_LEAD_IN:
@@ -123,8 +119,6 @@ void capture_rim(FILE *f, enum captureState_e *state, unsigned char c)
 			break;
 
 		case CS_DATA_L:
-		case CS_ADDRESS_H:
-		case CS_ADDRESS_L:
 			break;
 	}
 }
@@ -140,7 +134,7 @@ void capture_bin(FILE *f, enum captureState_e *state, unsigned char c)
 		case CS_START:
 			if (c == CC_LEAD)
 				leadinCount++;
-				*state = CS_LEAD_IN;
+			*state = CS_LEAD_IN;
 			break;
 
 		case CS_LEAD_IN:
@@ -198,6 +192,7 @@ void capture_bin(FILE *f, enum captureState_e *state, unsigned char c)
 			break;
 
 		case CS_DONE:
+		case CS_DATA_H:
 			break;
 	}
 }
@@ -216,7 +211,6 @@ int main(int argc, char **argv)
 {
 	char *portname = "/dev/ttyUSB0";
 	int fd;
-	int wlen;
 	char *filename;
 	FILE *fCapture;
 	enum captureState_e state = CS_START;
