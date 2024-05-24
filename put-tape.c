@@ -16,10 +16,6 @@ int set_interface_attribs(int fd, int speed)
 		return -1;
 	}
 
-	// Custom baudrate
-	tty.c_cflag |= CBAUDEX;
-	tty.c_cflag &= ~CBAUD;
-
 	tty.c_cflag |= (CLOCAL | CREAD);    /* ignore modem controls */
 	tty.c_cflag &= ~CSIZE;
 	tty.c_cflag |= CS8;         /* 8-bit characters */
@@ -54,8 +50,6 @@ int main(int argc, char **argv)
 {
 	char *portname = "/dev/ttyUSB0";
 	int fd;
-	int wlen;
-	char *filename;
 	int buff[1];
 
 	fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
