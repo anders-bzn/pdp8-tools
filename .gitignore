@@ -2,3 +2,4 @@ capture-papertape
 parse-bootrom
 create-bootrom
 put-tape
+serial-dump
