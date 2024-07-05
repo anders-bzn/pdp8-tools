@@ -367,7 +367,7 @@ int main(int argc, char **argv)
     }
 
     if (args.log_file) {
-    fd_log = open(args.log_file, O_WRONLY | O_CREAT | O_SYNC, 0644);
+        fd_log = open(args.log_file, O_WRONLY | O_CREAT | O_SYNC, 0644);
         if (fd_log < 0) {
             fprintf(stderr, "Error opening log file %s: %s\n", args.log_file, strerror(errno));
             ret = -1;
