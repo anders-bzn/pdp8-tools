@@ -33,7 +33,7 @@ static char doc[] =
 /* The options we understand. */
 static struct argp_option options[] = {
     {"device", 'd', "DEV",     OPTION_ARG_OPTIONAL,  "Serial device"},
-    {"log",    'l', "FILE",    OPTION_ARG_OPTIONAL,  "Dump recieved data to file"},
+    {"log",    'l', "FILE",    OPTION_ARG_OPTIONAL,  "Dump received data to file"},
     {"bits",   'b', "5,6,7,8", OPTION_ARG_OPTIONAL,  "Number of data bits"},
     {"parity", 'p', "N,E,O,M", OPTION_ARG_OPTIONAL,  "Parity"},
     {"stop",   'S', "1,2",     OPTION_ARG_OPTIONAL,  "Number of stop bits"},
@@ -63,7 +63,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
     struct argp_arguments *arguments = state->input;
 
     switch (key){
-    case 'd': 
+    case 'd':
         arguments->device = arg;
         break;
     case 'l':
