@@ -26,9 +26,11 @@ const char *argp_program_version =
 const char *argp_program_bug_address =
     "<anders@abc80.net>";
 
+
 /* Program documentation. */
 static char doc[] =
     "serial-dump program, takes input from serial port and prints in a hexdump style. Default is 9600 8N1 on device /dev/ttyUSB0.";
+
 
 /* The options we understand. */
 static struct argp_option options[] = {
@@ -42,133 +44,9 @@ static struct argp_option options[] = {
     { 0 }
 };
 
-/* Used by main to communicate with parse_opt. */
-struct argp_arguments
-{
-    char *device;
-    char *log_file;
-    int bits;
-    char parity;
-    int stop_bits;
-    int speed;
-    bool quiet;
-};
 
-/* Parse a single option. */
-static error_t
-parse_opt (int key, char *arg, struct argp_state *state)
-{
-    /* Get the input argument from argp_parse, which we
-    know is a pointer to our arguments structure. */
-    struct argp_arguments *arguments = state->input;
-
-    switch (key){
-    case 'd':
-        arguments->device = arg;
-        break;
-    case 'l':
-        arguments->log_file = arg;
-        break;
-    case 'b':
-        if (arg != NULL) {
-            switch (arg[0]){
-            case '5':
-                arguments->bits = 5;
-                break;
-            case '6':
-                arguments->bits = 6;
-                break;
-            case '7':
-                arguments->bits = 7;
-                break;
-            case '8':
-                arguments->bits = 8;
-                break;
-            default:
-                argp_usage (state);
-                return ARGP_ERR_UNKNOWN;
-                break;
-            break;
-            }
-        }
-        break;
-    case 'p':
-        if (arg != NULL) {
-            switch (arg[0]){
-            case 'N':
-            case 'O':
-            case 'E':
-            case 'M':
-                arguments->parity = arg[0];
-                break;
-            default:
-                argp_usage (state);
-                return ARGP_ERR_UNKNOWN;
-                break;
-            break;
-            }
-        }
-        break;
-    case 'S':
-        if (arg != NULL) {
-            switch (arg[0]){
-            case '1':
-                arguments->stop_bits = 1;
-                break;
-            case '2':
-                arguments->stop_bits = 2;
-                break;
-            default:
-                argp_usage (state);
-                return ARGP_ERR_UNKNOWN;
-                break;
-            }
-        }
-        break;
-    case 's':
-        if (arg != NULL) {
-            arguments->speed = atoi(arg);
-        } else {
-            argp_usage (state);
-            return ARGP_ERR_UNKNOWN;
-        }
-        break;
-        case 'q':
-        arguments->quiet = true;
-    break;
-
-    case ARGP_KEY_ARG:
-        if (state->arg_num != 0){
-            argp_usage (state);
-            return ARGP_ERR_UNKNOWN;
-        }
-        break;
-
-    case ARGP_KEY_END:
-        if (state->arg_num != 0){
-            argp_usage (state);
-            return ARGP_ERR_UNKNOWN;
-        }
-        break;
-
-    default:
-        return ARGP_ERR_UNKNOWN;
-    }
-
-    return 0;
-}
-
-static struct argp argp = { options, parse_opt, NULL, doc };
-
-int set_interface_attribs(int fd, int baud, char parity, int bits, int stop_bits)
-{
-    struct termios tty;
+speed_t map_baudrate(int baud){
     speed_t speed;
-
-    if (tcgetattr(fd, &tty) < 0) {
-        fprintf(stderr, "Error from tcgetattr: %s\n", strerror(errno));
-        return -1;
-    }
 
     switch (baud) {
     case 110:
@@ -239,13 +117,156 @@ int set_interface_attribs(int fd, int baud, char parity, int bits, int stop_bits
         break;
     case 20000000:
         speed = B2000000;
-        default:
-            fprintf(stderr, "Invalid baudrate: %d\n", baud);
-            return -1;
+    default:
+        speed = -1;
+    }
+    return speed;
+}
 
+
+/* Used by main to communicate with parse_opt. */
+struct argp_arguments
+{
+    char *device;
+    char *log_file;
+    int bits;
+    char parity;
+    int stop_bits;
+    speed_t speed;
+    bool quiet;
+};
+
+
+/* Parse a single option. */
+static error_t
+parse_opt (int key, char *arg, struct argp_state *state)
+{
+    /* Get the input argument from argp_parse, which we
+    know is a pointer to our arguments structure. */
+    struct argp_arguments *arguments = state->input;
+
+    switch (key){
+    case 'd':
+        arguments->device = arg;
+        break;
+    case 'l':
+        arguments->log_file = arg;
+        break;
+    case 'b':
+        if (arg != NULL) {
+            switch (arg[0]){
+            case '5':
+                arguments->bits = 5;
+                break;
+            case '6':
+                arguments->bits = 6;
+                break;
+            case '7':
+                arguments->bits = 7;
+                break;
+            case '8':
+                arguments->bits = 8;
+                break;
+            default:
+                fprintf(stderr, "Error, invalid number of bits: %s\n", arg);
+                argp_usage (state);
+                return ARGP_ERR_UNKNOWN;
+                break;
+            break;
+            }
+        }
+        break;
+    case 'p':
+        if (arg != NULL) {
+            switch (arg[0]){
+            case 'N':
+            case 'O':
+            case 'E':
+            case 'M':
+                arguments->parity = arg[0];
+                break;
+            default:
+                fprintf(stderr, "Error, invalid parity (N/O/E/M): %s\n", arg);
+                argp_usage (state);
+                return ARGP_ERR_UNKNOWN;
+                break;
+            break;
+            }
+        }
+        break;
+    case 'S':
+        if (arg != NULL) {
+            switch (arg[0]){
+            case '1':
+                arguments->stop_bits = 1;
+                break;
+            case '2':
+                arguments->stop_bits = 2;
+                break;
+            default:
+                fprintf(stderr, "Error, invalid number of stop bits: %s\n", arg);
+                argp_usage (state);
+                return ARGP_ERR_UNKNOWN;
+                break;
+            }
+        }
+        break;
+    case 's':
+        if (arg != NULL) {
+            int baud = atoi(arg);
+
+            arguments->speed = map_baudrate(baud);
+
+            if (arguments->speed == -1) {
+                fprintf(stderr, "Invalid baudrate: %d\n", baud);
+                argp_usage (state);
+                return ARGP_ERR_UNKNOWN;
+            }
+        } else {
+            argp_usage (state);
+            return ARGP_ERR_UNKNOWN;
+        }
+        break;
+        case 'q':
+        arguments->quiet = true;
+    break;
+
+    case ARGP_KEY_ARG:
+        if (state->arg_num != 0){
+            argp_usage (state);
+            return ARGP_ERR_UNKNOWN;
+        }
+        break;
+
+    case ARGP_KEY_END:
+        if (state->arg_num != 0){
+            argp_usage (state);
+            return ARGP_ERR_UNKNOWN;
+        }
+        break;
+
+    default:
+        return ARGP_ERR_UNKNOWN;
     }
 
-    cfsetspeed(&tty, (speed_t)speed);
+    return 0;
+}
+
+
+static struct argp argp = { options, parse_opt, NULL, doc };
+
+
+int set_interface_attribs(int fd, speed_t speed, char parity, int bits, int stop_bits)
+{
+    struct termios tty;
+
+    if (tcgetattr(fd, &tty) < 0) {
+        fprintf(stderr, "Error from tcgetattr: %s\n", strerror(errno));
+        return -1;
+    }
+
+
+    cfsetspeed(&tty, speed);
     tty.c_cflag |= (CLOCAL | CREAD | PARENB);    /* ignore modem controls */
     tty.c_cflag &= ~CSIZE;
 
@@ -350,7 +371,7 @@ int main(int argc, char **argv)
     args.device = "/dev/ttyUSB0";
     args.log_file = NULL;
     args.quiet = false;
-    args.speed = 9600;
+    args.speed = B9600;
 
     argp_parse (&argp, argc, argv, 0, 0, &args);
 
