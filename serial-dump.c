@@ -1,8 +1,8 @@
-/* 
- * Simple serial-dump program. 
+/*
+ * Simple serial-dump program.
  *
- * Licence GPL 2.0 
- * 
+ * Licence GPL 2.0
+ *
  * By Anders Sandahl 2024
  *
  */
@@ -249,15 +249,15 @@ int set_interface_attribs(int fd, int baud, char parity, int bits, int stop_bits
     tty.c_cflag |= (CLOCAL | CREAD | PARENB);    /* ignore modem controls */
     tty.c_cflag &= ~CSIZE;
 
-    if (bits == 5) 
+    if (bits == 5)
         tty.c_cflag |= CS5;         /* 5-bit characters */
-    if (bits == 6) 
+    if (bits == 6)
         tty.c_cflag |= CS6;         /* 6-bit characters */
-    if (bits == 7) 
+    if (bits == 7)
         tty.c_cflag |= CS7;         /* 7-bit characters */
     else if (bits == 8)
         tty.c_cflag |= CS8;         /* 8-bit characters */
-    else 
+    else
         return -1;
 
     if (parity == 'N') {
@@ -270,11 +270,11 @@ int set_interface_attribs(int fd, int baud, char parity, int bits, int stop_bits
         tty.c_cflag |= PARODD;      /* even parity */
     } else return -1;
 
-    if (stop_bits == 1) 
+    if (stop_bits == 1)
         tty.c_cflag &= ~CSTOPB;     /* 1 stop bit */
     else
         tty.c_cflag |= CSTOPB;      /* 2 stop bits */
-        
+
     tty.c_cflag &= ~CRTSCTS;        /* no hardware flowcontrol */
 
     /* setup for non-canonical mode */
@@ -299,7 +299,7 @@ void printchar(char data, int num_recived)
     int i;
     static char buff[17];
 
-/* 
+/*
 Printed format:
 00000000  71 71 71 71 71 71 71 71  71 71 71 71 71 71 71 71  |qqqqqqqqqqqqqqqq|
 */
@@ -308,16 +308,16 @@ Printed format:
     i = num_recived & 0xf;
     buff[i] = isprint(data) ? data : '.';
 
-    if ((num_recived & 0xf) == 0) 
+    if ((num_recived & 0xf) == 0)
         printf("%8.8x  ", num_recived);
 
     printf("%2.2x ", data & 0xff);
 
     if (i == 15) {
         printf(" |%s|\n", buff);
-    } 
-    
-    if (i == 7) 
+    }
+
+    if (i == 7)
         printf(" ");
 }
 
@@ -377,14 +377,14 @@ int main(int argc, char **argv)
 
     tcgetattr(0, &tc);
     set_term_quiet_input();
-    
+
     do {
         unsigned char ch;
         num = read(fd, &ch, 1);
 
         if (poll(&pfd, 1, 0)>0) {
             int c = getchar();
-            if (c == 'q') 
+            if (c == 'q')
                 exit = true;
         }
 
