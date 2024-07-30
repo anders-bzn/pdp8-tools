@@ -32,9 +32,9 @@ static char doc[] =
     "serial-dump program, takes input from serial port and prints in a hexdump style. Default is 9600 8N1 on device /dev/ttyUSB0.";
 
 
-/* The options we understand. */
+/* Options to be parsed. */
 static struct argp_option options[] = {
-    {"device", 'd', "DEV",     OPTION_ARG_OPTIONAL,  "Serial device"},
+    {"device", 'd', "DEV",     OPTION_ARG_OPTIONAL,  "Serial device, /dev/ttyXXX"},
     {"log",    'l', "FILE",    OPTION_ARG_OPTIONAL,  "Dump received data to file"},
     {"bits",   'b', "5,6,7,8", OPTION_ARG_OPTIONAL,  "Number of data bits"},
     {"parity", 'p', "N,E,O,M", OPTION_ARG_OPTIONAL,  "Parity"},
