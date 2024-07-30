@@ -373,7 +373,8 @@ int main(int argc, char **argv)
     args.quiet = false;
     args.speed = B9600;
 
-    argp_parse (&argp, argc, argv, 0, 0, &args);
+    if (0 > argp_parse (&argp, argc, argv, 0, 0, &args))
+        return -1;
 
     fd = open(args.device, O_RDWR | O_NOCTTY | O_SYNC);
     if (fd < 0) {
