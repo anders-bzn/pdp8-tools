@@ -31,9 +31,9 @@ static char doc[] =
     "PDP-8 rim and bin formats can be validated. Default is 9600 8N1 on device /dev/ttyUSB0.";
 
 
-/* The options we understand. */
+/* Options to be parsed. */
 static struct argp_option options[] = {
-    {"device",          'd', "DEV",         OPTION_ARG_OPTIONAL, "Serial device"},
+    {"device",          'd', "DEV",         OPTION_ARG_OPTIONAL, "Serial device, /dev/ttyXXX"},
     {"bits",            'b', "5,6,7,8",     OPTION_ARG_OPTIONAL, "Number of data bits"},
     {"parity",          'p', "N,E,O,M",     OPTION_ARG_OPTIONAL, "Parity"},
     {"stop",            'S', "1,2",         OPTION_ARG_OPTIONAL, "Number of stop bits"},
@@ -561,7 +561,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    /* Simple noncanonical input */
+    /* Simple non canonical input */
     do {
         unsigned char buf[80];
         int rdlen;
