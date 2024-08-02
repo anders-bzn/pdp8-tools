@@ -1,3 +1,12 @@
+/*
+ * Program for sending papertapes
+ *
+ * Licence GPL 2.0
+ *
+ * By Anders Sandahl 2024
+ *
+ */
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
