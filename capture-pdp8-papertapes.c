@@ -582,8 +582,8 @@ int main(int argc, char **argv)
             fprintf(stderr, "Error from read: %d: %s\n", rdlen, strerror(errno));
             time_out = true;
         }
-    } while (state == CS_START ||
-                     (state != CS_DONE && !time_out));
+    } while (state == CS_START || (state != CS_DONE && !time_out));
+
     close(fd);
     fclose(fCapture);
 }
