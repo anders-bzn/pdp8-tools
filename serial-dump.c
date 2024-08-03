@@ -288,7 +288,7 @@ int set_interface_attribs(int fd, speed_t speed, char parity, int bits, int stop
         tty.c_cflag &= ~PARODD;     /* even parity */
     } else if (parity == 'O') {
         tty.c_cflag |= PARENB;      /* parity */
-        tty.c_cflag |= PARODD;      /* even parity */
+        tty.c_cflag |= PARODD;      /* odd parity */
     } else return -1;
 
     if (stop_bits == 1)
