@@ -383,10 +383,12 @@ void capture_raw(FILE *f, enum captureState_e *state, unsigned char c, int strip
     switch (*state) {
         case CS_START:
             if (strip_char != c) {
-                if (strip_char != -1)
+                if (strip_char != -1) {
                     while(i--)
                         fputc(strip_char, f);
-
+                } else {
+                    fputc(c, f);
+                }
                 *state = CS_LEAD_IN;
             }
             break;
