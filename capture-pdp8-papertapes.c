@@ -322,7 +322,7 @@ int set_interface_attribs(int fd, speed_t speed, char parity, int bits, int stop
         tty.c_cflag &= ~PARODD;     /* even parity */
     } else if (parity == 'O') {
         tty.c_cflag |= PARENB;      /* parity */
-        tty.c_cflag |= PARODD;      /* even parity */
+        tty.c_cflag |= PARODD;      /* odd parity */
     } else return -1;
 
     if (stop_bits == 1)
@@ -553,11 +553,13 @@ int main(int argc, char **argv)
     }
 
     if (set_interface_attribs(fd, args.speed, args.parity, args.bits, args.stop_bits, args.handshake) < 0) {
+        close(fd);
         return -1;
     }
 
     if ((fCapture = fopen(args.file, "w")) == NULL) {
         fprintf(stderr, "Could not write to file \"%s\": %s\n", args.file, strerror(errno));
+        close(fd);
         return -1;
     }
 
