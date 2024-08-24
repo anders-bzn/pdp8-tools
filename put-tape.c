@@ -36,6 +36,7 @@ static struct argp_option options[] = {
     {"device",          'd', "DEV",         OPTION_ARG_OPTIONAL, "Serial device, /dev/ttyXXX"},
     {"bits",            'b', "5,6,7,8",     OPTION_ARG_OPTIONAL, "Number of data bits"},
     {"parity",          'p', "N,E,O,M",     OPTION_ARG_OPTIONAL, "Parity"},
+    {"transmit-delay",  't', "NUMBER",      OPTION_ARG_OPTIONAL, "Character transmit delay 0-1000ms"},
     {"stop",            'S', "1,2",         OPTION_ARG_OPTIONAL, "Number of stop bits"},
     {"speed",           's', "BAUD",        OPTION_ARG_OPTIONAL, "Serial com speed"},
     {"handshake",       'h', 0,             OPTION_ARG_OPTIONAL, "Use RTS/CTS handshake"},
@@ -132,6 +133,7 @@ struct argp_arguments
     int stop_bits;
     bool handshake;
     speed_t speed;
+    int transmit_delay;
 };
 
 
@@ -217,6 +219,20 @@ parse_opt (int key, char *arg, struct argp_state *state)
 
             if (arguments->speed == -1) {
                 fprintf(stderr, "Invalid baudrate: %d\n", baud);
+                argp_usage (state);
+                return ARGP_ERR_UNKNOWN;
+            }
+        } else {
+            argp_usage (state);
+            return ARGP_ERR_UNKNOWN;
+        }
+        break;
+    case 't':
+        if (arg != NULL) {
+            arguments->transmit_delay = atoi(arg);
+
+            if (arguments->transmit_delay > 1000 || arguments->transmit_delay < 0) {
+                fprintf(stderr, "Invalid delay: %dms\n", arguments->transmit_delay);
                 argp_usage (state);
                 return ARGP_ERR_UNKNOWN;
             }
@@ -327,6 +343,7 @@ int main(int argc, char **argv)
     args.stop_bits = 1;
     args.device = "/dev/ttyUSB0";
     args.file = NULL;
+    args.transmit_delay = 0;
     args.speed = B9600;
     args.handshake = false;
 
@@ -358,11 +375,12 @@ int main(int argc, char **argv)
     }
 
     /*
-     * Get every char from f and put them on the serialport until EOF.
+     * Get every char from f and put them on the serial port until EOF.
      */
     while (EOF != (ch = fgetc(f))) {
         buff[0] = ch;
         write(fd, buff, 1);
+        usleep(1000 * args.transmit_delay);
     }
 
     close(fd);
